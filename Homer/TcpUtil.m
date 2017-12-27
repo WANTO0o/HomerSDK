@@ -75,6 +75,35 @@ TcpClient *client;
     return devVersion;
 }
 
++(NSString *) getDeviceType:(NSString *)devHost {
+    NSString *devType = @"";
+    
+    Byte byte[] = {
+        0x5A,  // 0
+        0x00,  // 1
+        0x00,  // 2
+        0x00,  // 3
+        0x00,  // 4
+        0x00,  // 5
+        0x00,  // 6
+        0xF1,  // 7
+        0x00,  // 8
+        0xA5   // 9
+    };
+    
+    NSData *sendData = [[NSData alloc] initWithBytes:byte length:sizeof(byte)/sizeof(Byte)];
+    
+    [self readDev:devHost WithData:sendData];
+    
+    sleep(1);
+    
+    devType = [client getDeviceType];
+    
+    [client disconnect];
+    
+    return devType;
+}
+
 +(Boolean) setDev:(NSString *)devHost ColortoRed:(Byte)r Green:(Byte)g Blue:(Byte)b White:(Byte)w {
     
     Byte byte[] = {
@@ -356,6 +385,46 @@ TcpClient *client;
     NSData *sendData = [[NSData alloc] initWithBytes:byte length:sizeof(byte)/sizeof(Byte)];
     
     return [self sendDev:devHost WithData:sendData];
+}
+
+// Auth
++(Boolean) writeAuth:(NSString *)devHost WithChipId:(int)chipId {
+    int key = 0xA109891B;
+    int signature = 0;
+    signature |= (chipId >> 13);
+    signature |= (chipId << (32-13));
+    signature ^= key;
+    
+    Byte signatureInByte[4];
+    signatureInByte[0] = (Byte) ((signature>>24) & 0xFF);
+    signatureInByte[1] = (Byte) ((signature>>16)& 0xFF);
+    signatureInByte[2] = (Byte) ((signature>>8)&0xFF);
+    signatureInByte[3] = (Byte) (signature & 0xFF);
+    
+    Byte byte[] = {
+        0x5A,  // 0
+        0x00,  // 1
+        0x00,  // 2
+        0x00,  // 3
+        0x00,  // 4
+        0x00,  // 5
+        0x00,  // 6
+        0xFB,  // 7
+        0x04,  // 8
+        signatureInByte[0], // 9
+        signatureInByte[1], // 10
+        signatureInByte[2], // 11
+        signatureInByte[3], // 12
+        0xA5   // 13
+    };
+    
+    NSData *sendData = [[NSData alloc] initWithBytes:byte length:sizeof(byte)/sizeof(Byte)];
+    
+    return [self sendDev:devHost WithData:sendData];
+}
+
++(Boolean) cleanAuth:(NSString *)devHost {
+    return [self writeAuth:devHost WithChipId:0];
 }
 
 // Common function

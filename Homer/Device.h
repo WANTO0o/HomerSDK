@@ -195,4 +195,9 @@ typedef NS_ENUM(NSInteger, eRegularAction) {
  */
 -(Boolean) resetFactaury;
 
+// No publish
+-(Boolean) writeAuthWithChipId:(int)chipId;
+
+-(Boolean) cleanAuth;
+
 @end
