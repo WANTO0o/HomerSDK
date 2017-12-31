@@ -214,4 +214,17 @@
 -(Boolean) cleanAuth{
     return [TcpUtil cleanAuth:self.deviceIp];
 }
+
+-(EAuthState) writeAuth {
+    int chipId = [TcpUtil getChipIDWithIp:self.deviceIp];
+    if(chipId == (int)0xFFFFFFFF) {
+        return HasAuth; // 已经授权
+    }
+    
+    if([self writeAuthWithChipId:chipId]) {
+        return AuthSuccess; // 授权成功
+    } else {
+        return AuthFail; // 授权失败
+    }
+}
 @end

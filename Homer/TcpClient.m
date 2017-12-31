@@ -23,6 +23,7 @@ NSString *devId;
 NSMutableDictionary *slaverDict;
 NSString *devVer;
 NSString *devType;
+int chipId;
 
 @implementation TcpClient
 
@@ -104,6 +105,10 @@ NSString *devType;
 
 -(NSString *)getDeviceType {
     return devType;
+}
+
+-(int)getChipId {
+    return chipId;
 }
 
 -(void) socket:(GCDAsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag
@@ -190,6 +195,23 @@ NSString *devType;
             
             devVer = [NSString stringWithFormat:@"%@.%@.%@", deviceVer1, deviceVer2, deviceVer3];
             devType = [NSString stringWithFormat:@"%d", devTypeNum];
+        }
+        // chipId
+        if (valueType == 0xFB) {
+            Byte buf[4];
+            buf[0] = dataInByte[9];
+            buf[1] = dataInByte[10];
+            buf[2] = dataInByte[11];
+            buf[3] = dataInByte[12];
+            
+            int tempChipId = 0;
+            tempChipId = (int)( ((buf[0] & 0xFF)<<24)
+                             |((buf[1] & 0xFF)<<16)
+                             |((buf[2] & 0xFF)<<8)
+                             |(buf[3] & 0xFF));
+            
+            chipId = tempChipId;
+            //NSLog(@"TcpUtil chipId %d", chipId);
         }
     }
 }

@@ -66,4 +66,6 @@
 
 +(Boolean) cleanAuth:(NSString *)devHost;
 
++(int) getChipIDWithIp:(NSString *) devHost;
+
 @end

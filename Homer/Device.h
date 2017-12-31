@@ -200,4 +200,12 @@ typedef NS_ENUM(NSInteger, eRegularAction) {
 
 -(Boolean) cleanAuth;
 
+typedef NS_ENUM(NSInteger, EAuthState) {
+    AuthSuccess = 0,
+    HasAuth = 1,
+    AuthFail = -1
+};
+
+-(EAuthState) writeAuth;
+
 @end

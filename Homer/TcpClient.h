@@ -37,4 +37,6 @@
 
 -(NSString *)getDeviceType;
 
+-(int)getChipId;
+
 @end

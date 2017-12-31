@@ -427,6 +427,35 @@ TcpClient *client;
     return [self writeAuth:devHost WithChipId:0];
 }
 
++(int) getChipIDWithIp:(NSString *)devHost {
+    int chipID = 0;
+    
+    Byte byte[] = {
+        0x5A,  // 0
+        0x00,  // 1
+        0x00,  // 2
+        0x00,  // 3
+        0x00,  // 4
+        0x00,  // 5
+        0x00,  // 6
+        0xFB,  // 7
+        0x00,  // 8
+        0xA5   // 9
+    };
+    
+    NSData *sendData = [[NSData alloc] initWithBytes:byte length:sizeof(byte)/sizeof(Byte)];
+    
+    [self readDev:devHost WithData:sendData];
+    
+    sleep(1);
+    
+    chipID = [client getChipId];
+    
+    [client disconnect];
+    
+    return chipID;
+}
+
 // Common function
 
 +(Boolean) sendDev:(NSString *)devHost WithData:(NSData *)data {
