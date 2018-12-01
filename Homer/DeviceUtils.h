@@ -6,13 +6,7 @@
 //  Copyright (c) 2015年 Aryan Ghassemi. All rights reserved.
 //
 
-
-
-
 @interface DeviceUtils:NSObject
-
-
-
 
 //数据格式验证.
 +(bool)isValid:(NSString*)data;

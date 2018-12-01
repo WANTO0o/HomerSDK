@@ -61,6 +61,17 @@
 // 设置白灯和彩灯亮度
 +(Boolean) setDev:(NSString *)devHost :(Byte)brightness;
 
+// 20180902: 场景接口
++(Boolean) setDev:(NSString *)devHost
+            Scene:(Byte)mode
+            Speed:(Byte)speed
+       Brightness:(Byte)brightness
+         ColorNum:(int)colorNum
+           Colors:(NSMutableArray*)colors;
+
+// 20181127: 场景调试接口
++(Boolean)setDev:(NSString *)devHost SceneType:(Byte)mode;
+
 // Auth:
 +(Boolean) writeAuth:(NSString *)devHost WithChipId:(int)chipId;
 

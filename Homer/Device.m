@@ -206,6 +206,14 @@
     return [TcpUtil setDev:self.deviceIp regularId:regularId regularType:0x00 startTimeS:startTimeByte loopTimeS:loopTimeByte];
 }
 
+-(Boolean)setSceneMode:(eSceneMode)mode Speed:(int)speed Brightness:(int)brightness ColorNum:(int)colorNum Colors:(NSMutableArray *)colorArray {
+    return [TcpUtil setDev:self.deviceIp Scene:mode Speed:(Byte)speed Brightness:(Byte)brightness ColorNum:colorNum Colors:colorArray];
+}
+
+-(Boolean)setSceneMode:(Byte)mode {
+    return [TcpUtil setDev:self.deviceIp SceneType:mode];
+}
+
 // Auth
 -(Boolean) writeAuthWithChipId:(int)chipId {
     return [TcpUtil writeAuth:self.deviceIp WithChipId:chipId];

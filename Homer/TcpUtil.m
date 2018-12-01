@@ -387,6 +387,129 @@ TcpClient *client;
     return [self sendDev:devHost WithData:sendData];
 }
 
++(Boolean)setDev:(NSString *)devHost Scene:(Byte)mode Speed:(Byte)speed Brightness:(Byte)brightness ColorNum:(int)colorNum Colors:(NSMutableArray *)colors {
+    
+    if([colors count] != 7) {
+        NSLog(@"情景颜色数量不对");
+        return false;
+    }
+    
+    if(colorNum > 7) {
+        NSLog(@"颜色配置数量不对");
+        return  false;
+    }
+    
+    Byte byte[] = {
+        0x5A,  // 0
+        0x00,  // 1
+        0x00,  // 2
+        0x00,  // 3
+        0x00,  // 4
+        0x00,  // 5
+        0x00,  // 6
+        0x54,  // 7
+        0x12,  // 8
+        mode,  // 模式
+        speed, // 速度，单位100ms
+        brightness, // 亮度, 0-100
+        (Byte)colorNum, // 颜色数量, 0-7
+        (Byte)((int)colors[0] >> 24),
+        (Byte)((int)colors[0] >> 16),
+        (Byte)((int)colors[1] >> 24),
+        (Byte)((int)colors[1] >> 16),
+        (Byte)((int)colors[2] >> 24),
+        (Byte)((int)colors[2] >> 16),
+        (Byte)((int)colors[3] >> 24),
+        (Byte)((int)colors[3] >> 16),
+        (Byte)((int)colors[4] >> 24),
+        (Byte)((int)colors[4] >> 16),
+        (Byte)((int)colors[5] >> 24),
+        (Byte)((int)colors[5] >> 16),
+        (Byte)((int)colors[6] >> 24),
+        (Byte)((int)colors[6] >> 16),
+        0xA5
+    };
+    
+    NSData *sendData = [[NSData alloc] initWithBytes:byte length:sizeof(byte)/sizeof(Byte)];
+    
+    NSLog(@"%@", sendData);
+    
+    return [self sendDev:devHost WithData:sendData];
+}
+
++(Boolean)setDev:(NSString *)devHost SceneType:(Byte)mode {
+
+    NSData *sendData;
+    
+    // 轻音乐
+    if(mode == 0x01) {
+        Byte bytes[] = {
+            0x5A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x54, 0x12,
+            0x01, 0x01, 0x64, 0x01, 0xf0, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0xA5
+        };
+        
+        sendData = [[NSData alloc] initWithBytes:bytes length:sizeof(bytes)/sizeof(Byte)];
+    }
+    
+    // 三色跳变
+    else if (mode == 0x02) {
+        Byte bytes[] = {
+            0x5A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x54, 0x12,
+            0x03, 0x02, 0x64, 0x03, 0x00, 0x00, 0x78, 0x00, 0xf0,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0xA5
+        };
+        
+        sendData = [[NSData alloc] initWithBytes:bytes length:sizeof(bytes)/sizeof(Byte)];
+    }
+    
+    // 七色频闪
+    else if (mode == 0x03) {
+        Byte bytes[] = {
+            0x5A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x54, 0x12,
+            0x04, 0x05, 0x64, 0x07, 0x00, 0x00, 0x18, 0x00, 0x3c,
+            0x00, 0x78, 0x00, 0xb4, 0x00, 0xf0, 0x00, 0x18, 0x01,
+            0xA5
+        };
+        
+        sendData = [[NSData alloc] initWithBytes:bytes length:sizeof(bytes)/sizeof(Byte)];
+    }
+    
+    // 七彩渐变
+    else if (mode == 0x04) {
+        Byte bytes[] = {
+            0x5A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x54, 0x12,
+            0x02, 0x01, 0x64, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0xA5
+        };
+        
+        sendData = [[NSData alloc] initWithBytes:bytes length:sizeof(bytes)/sizeof(Byte)];
+    }
+    
+    // 七彩跳变
+    else if (mode == 0x05) {
+        Byte bytes[] = {
+            0x5A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x54, 0x12,
+            0x03, 0x05, 0x64, 0x07, 0x00, 0x00, 0x18, 0x00, 0x3c,
+            0x00, 0x78, 0x00, 0xb4, 0x00, 0xf0, 0x00, 0x18, 0x01,
+            0xA5
+        };
+        
+        sendData = [[NSData alloc] initWithBytes:bytes length:sizeof(bytes)/sizeof(Byte)];
+    }
+    
+    else {
+        return false;
+    }
+    
+    NSLog(@"%@", sendData);
+    
+    return [self sendDev:devHost WithData:sendData];
+}
+
 // Auth
 +(Boolean) writeAuth:(NSString *)devHost WithChipId:(int)chipId {
     int key = 0xA109891B;
