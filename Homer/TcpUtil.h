@@ -79,4 +79,12 @@
 
 +(int) getChipIDWithIp:(NSString *) devHost;
 
++(NSArray *)getHSB:(NSString *)devHost;
+
++(Boolean) getDevState:(NSString *)devHost;
+
++(NSDictionary *) getDevInfo:(NSString *)devHost;
+
++(int) getBrightness:(NSString *)devHost;
+
 @end

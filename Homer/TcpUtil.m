@@ -579,6 +579,90 @@ TcpClient *client;
     return chipID;
 }
 
++(NSArray *) getHSB:(NSString *)devHost {
+    NSArray *hsbArray = [[NSArray alloc] init];
+    
+    Byte byte[] = {
+        0x5A,  // 0
+        0x00,  // 1
+        0x00,  // 2
+        0x00,  // 3
+        0x00,  // 4
+        0x00,  // 5
+        0x00,  // 6
+        0x50,  // 7
+        0x00,  // 8
+        0xA5   // 9
+    };
+    
+    NSData *sendData = [[NSData alloc] initWithBytes:byte length:sizeof(byte)/sizeof(Byte)];
+    
+    [self readDev:devHost WithData:sendData];
+    
+    sleep(1);
+    
+    hsbArray = [client getHSB];
+    
+    [client disconnect];
+    
+    return hsbArray;
+}
+
++(Boolean)getDevState:(NSString *)devHost {
+    Byte byte[] = {
+        0x5A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0xA5
+    };
+    
+    NSData *sendData = [[NSData alloc] initWithBytes:byte length:sizeof(byte)/sizeof(Byte)];
+    
+    [self readDev:devHost WithData:sendData];
+    
+    sleep(1);
+    
+    return [client getDevState];
+}
+
++(NSDictionary *) getDevInfo:(NSString *)devHost {
+    if(devHost == nil) {return nil;}
+    
+    dispatch_queue_t serialQueue = dispatch_queue_create("myThreadQueue1", DISPATCH_QUEUE_SERIAL);
+    
+    client = [[TcpClient alloc]initWithIp:devHost andPort:SERVERPORT andQueue:serialQueue];
+    
+    [client connect];
+    
+    [client listenData];
+    
+    Byte devStateBytes[] = {
+        0x5A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0xA5
+    };
+    [self sendData:client With:devStateBytes];
+    
+    sleep(1);
+    
+    Byte hsbBytes[] = {
+        0x5A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x50, 0x00, 0xA5
+    };
+    [self sendData:client With:hsbBytes];
+    
+    sleep(1);
+    
+    return [client getDevInfo];
+}
+
++(int) getBrightness:(NSString *)devHost {
+    Byte bytes[] = {
+        0x5A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x53, 0x00, 0xA5
+    };
+    NSData *sendData = [[NSData alloc] initWithBytes:bytes length:sizeof(bytes)/sizeof(Byte)];
+    
+    [self readDev:devHost WithData:sendData];
+    
+    sleep(1);
+    
+    return [client getBrightness];
+}
+
 // Common function
 
 +(Boolean) sendDev:(NSString *)devHost WithData:(NSData *)data {
@@ -586,6 +670,8 @@ TcpClient *client;
     if(devHost == nil) { return NO; }
     
     dispatch_queue_t serialQueue = dispatch_queue_create("myThreadQueue1", DISPATCH_QUEUE_SERIAL);
+    
+    NSLog(@"[SendData] %@", data);
     
     client = [[TcpClient alloc]initWithIp:devHost andPort:SERVERPORT andQueue:serialQueue];
     
@@ -602,6 +688,8 @@ TcpClient *client;
     
     dispatch_queue_t serialQueue = dispatch_queue_create("myThreadQueue1", DISPATCH_QUEUE_SERIAL);
     
+    NSLog(@"[SendForRead] %@", data);
+    
     client = [[TcpClient alloc]initWithIp:devHost andPort:SERVERPORT andQueue:serialQueue];
     
     [client connect];
@@ -610,6 +698,12 @@ TcpClient *client;
     
     [client sendData:data];
     
+    return YES;
+}
+
++(Boolean) sendData: (TcpClient *)client With:(Byte *)bytes {
+    NSData *sendData = [[NSData alloc] initWithBytes:bytes length:sizeof(bytes)/sizeof(Byte)];
+    [client sendData:sendData];
     return YES;
 }
 

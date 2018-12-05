@@ -39,4 +39,12 @@
 
 -(int)getChipId;
 
+-(NSArray *)getHSB;
+
+-(Boolean)getDevState;
+
+-(NSDictionary *)getDevInfo;
+
+-(int) getBrightness;
+
 @end

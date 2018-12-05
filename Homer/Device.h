@@ -29,6 +29,7 @@
 
 /**
  *  控制主设备灯光颜色
+ *  20181203:调整为HSB后弃用
  *
  *  @param r 红色参数
  *  @param g 绿色参数
@@ -49,6 +50,11 @@
  *  @return 成功YES 失败NO
  */
 -(Boolean) controlColorH:(uint32_t)h S:(uint32_t)s B:(uint32_t)b;
+
+/*
+ *  获取主设备颜色参数
+ */
+-(NSArray *) getColorHSB;
 
 /**
  *  控制主设备色温颜色
@@ -222,7 +228,19 @@ typedef NS_ENUM(NSInteger, eSceneMode) {
  */
 -(Boolean) resetFactaury;
 
-// No publish
+/*
+ *  获取设备开启关闭状态
+ */
+-(Boolean) getDevState;
+
+/*
+ *  获取设备所有详细信息
+ */
+-(NSDictionary *) getDevInfo;
+
+-(int) getBrightness;
+
+// No publish 以下方法只供内部使用
 -(Boolean) writeAuthWithChipId:(int)chipId;
 
 -(Boolean) cleanAuth;
@@ -234,5 +252,6 @@ typedef NS_ENUM(NSInteger, EAuthState) {
 };
 
 -(EAuthState) writeAuth;
+// END No publish
 
 @end

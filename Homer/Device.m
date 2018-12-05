@@ -55,6 +55,10 @@
     return [TcpUtil setDev:self.deviceIp ColorH:newH S:s B:b];
 }
 
+-(NSArray *) getColorHSB {
+    return [TcpUtil getHSB:self.deviceIp];
+}
+
 -(Boolean) controlColorTemperature:(uint16_t)value {
     return [TcpUtil setDev:self.deviceIp ColorTemperature:value];
 }
@@ -212,6 +216,19 @@
 
 -(Boolean)setSceneMode:(Byte)mode {
     return [TcpUtil setDev:self.deviceIp SceneType:mode];
+}
+
+-(Boolean)getDevState {
+    return [TcpUtil getDevState:self.deviceIp];
+}
+
+-(NSDictionary *)getDevInfo {
+    NSDictionary *dict = [[NSDictionary alloc] init];
+    return dict;
+}
+
+-(int) getBrightness {
+    return [TcpUtil getBrightness:self.deviceIp];
 }
 
 // Auth

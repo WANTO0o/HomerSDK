@@ -24,6 +24,9 @@ NSMutableDictionary *slaverDict;
 NSString *devVer;
 NSString *devType;
 int chipId;
+NSArray *hsbColor;
+Boolean devState;
+int brightness;
 
 @implementation TcpClient
 
@@ -111,15 +114,29 @@ int chipId;
     return chipId;
 }
 
+-(NSArray *)getHSB {
+    return hsbColor;
+}
+
+-(Boolean)getDevState {
+    return devState;
+}
+
+-(int) getBrightness {
+    return brightness;
+}
+
 -(void) socket:(GCDAsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag
 {
     //NSLog(@"Lib didReadData");
-    NSString *aStr = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    //NSString *aStr = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     Byte *dataInByte = (Byte *)[data bytes];
     
     //    for(int i = 0; i < [data length]; i++) {
     //        printf("testByte %d ", dataInByte[i]);
     //    }
+    
+    NSLog(@"[ReadData] %@", data);
     
     if([data length] >= 10) {
         Byte valueType = dataInByte[7];
@@ -170,6 +187,8 @@ int chipId;
                              |(buf[3] & 0xFF));
             
             devId = [NSString stringWithFormat:@"%d", deviceId];
+            // TODO: 后续是否将deviceID直接改成16进制格式地址
+            // devId = [NSString stringWithFormat:@"%08X", deviceId];
             //NSLog(@"DeviceID %@", devId);
         }
         
@@ -213,7 +232,78 @@ int chipId;
             chipId = tempChipId;
             //NSLog(@"TcpUtil chipId %d", chipId);
         }
+        // hsb
+        if (valueType == 0x50) {
+            int hStartIndex = 9;
+            Byte hBytes[] = {
+                dataInByte[hStartIndex],
+                dataInByte[hStartIndex + 1],
+                dataInByte[hStartIndex + 2],
+                dataInByte[hStartIndex + 3]
+            };
+            
+            int sStartIndex = 13;
+            Byte sBytes[] = {
+                dataInByte[sStartIndex],
+                dataInByte[sStartIndex + 1],
+                dataInByte[sStartIndex + 2],
+                dataInByte[sStartIndex + 3]
+            };
+            
+            int bStartIndex = 17;
+            Byte bBytes[] = {
+                dataInByte[bStartIndex],
+                dataInByte[bStartIndex + 1],
+                dataInByte[bStartIndex + 2],
+                dataInByte[bStartIndex + 3]
+            };
+            
+            int hVal = [self bytesToIntLE:hBytes] / 100;
+            int sVal = [self bytesToIntLE:sBytes] / 100;
+            int bVal = [self bytesToIntLE:bBytes] / 100;
+            
+            NSNumber *hNum = [NSNumber numberWithInt:hVal];
+            NSNumber *sNum = [NSNumber numberWithInt:sVal];
+            NSNumber *bNum = [NSNumber numberWithInt:bVal];
+            NSArray *dataArray = [NSArray arrayWithObjects:hNum, sNum, bNum, nil];
+            hsbColor = [NSArray arrayWithArray:dataArray];
+        }
+        // devState
+        if (valueType == 0x01) {
+            Byte byte = dataInByte[9];
+            if (byte == 0x00) {
+                devState = NO;
+            } else {
+                devState = YES;
+            }
+        }
+        // brightness
+        if (valueType == 0x53) {
+            Byte byte = dataInByte[9];
+            brightness = (int)byte;
+        }
     }
 }
+
+// 将一个byte数组（4个byte转一个int）转为int。大端模式（低地址放高位）
+- (int) bytesToIntBE: (Byte[])bytes {
+    int value = 0;
+    value = ((bytes[3] & 0xff)<<24)|
+            ((bytes[2] & 0xff)<<16)|
+            ((bytes[1] & 0xff)<<8)|
+            (bytes[0] & 0xff);
+    return value;
+}
+
+// 将一个byte数组（4个byte转一个int）转为int。小端模式（低地址放低位）
+- (int) bytesToIntLE: (Byte[])bytes {
+    int value = 0;
+    value = ((bytes[0] & 0xff)<<24)|
+            ((bytes[1] & 0xff)<<16)|
+            ((bytes[2] & 0xff)<<8)|
+            (bytes[3] & 0xff);
+    return value;
+}
+
 
 @end
