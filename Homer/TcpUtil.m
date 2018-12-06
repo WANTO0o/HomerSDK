@@ -622,8 +622,23 @@ TcpClient *client;
     return [client getDevState];
 }
 
++(int) getColorTemp:(NSString *)devHost {
+    Byte byte[] = {
+        0x5A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x52, 0x00, 0xA5
+    };
+    
+    NSData *sendData = [[NSData alloc] initWithBytes:byte length:sizeof(byte)/sizeof(Byte)];
+    
+    [self readDev:devHost WithData:sendData];
+    
+    sleep(1);
+    
+    return [client getColorTemp];
+}
+
 +(NSDictionary *) getDevInfo:(NSString *)devHost {
     if(devHost == nil) {return nil;}
+    NSLog(@"getDevIndo");
     
     dispatch_queue_t serialQueue = dispatch_queue_create("myThreadQueue1", DISPATCH_QUEUE_SERIAL);
     
@@ -633,21 +648,29 @@ TcpClient *client;
     
     [client listenData];
     
-    Byte devStateBytes[] = {
-        0x5A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0xA5
-    };
-    [self sendData:client With:devStateBytes];
-    
-    sleep(1);
+    // 读取色温。现在这两个东西分别发的话，收端只能够识别到第一条指令的返回，比较诡异
+//    Byte whiteLightBytes[] = {
+//        0x5A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x52, 0x00, 0xA5
+//    };
+//    NSData *whiteData = [[NSData alloc] initWithBytes:whiteLightBytes length:sizeof(whiteLightBytes)/sizeof(Byte)];
+//    [client sendData:whiteData];
+//
+//    sleep(1);
     
     Byte hsbBytes[] = {
         0x5A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x50, 0x00, 0xA5
     };
-    [self sendData:client With:hsbBytes];
+    NSData *hsbData = [[NSData alloc] initWithBytes:hsbBytes length:sizeof(hsbBytes)/sizeof(Byte)];
+    
+    [client sendData:hsbData];
     
     sleep(1);
     
-    return [client getDevInfo];
+    NSDictionary *devInfo = [client getDevInfo];
+    
+    [client disconnect];
+    
+    return devInfo;
 }
 
 +(int) getBrightness:(NSString *)devHost {
@@ -658,7 +681,7 @@ TcpClient *client;
     
     [self readDev:devHost WithData:sendData];
     
-    sleep(1);
+    sleep(0.05);
     
     return [client getBrightness];
 }
@@ -701,8 +724,9 @@ TcpClient *client;
     return YES;
 }
 
-+(Boolean) sendData: (TcpClient *)client With:(Byte *)bytes {
++(Boolean) sendData:(Byte *)bytes {
     NSData *sendData = [[NSData alloc] initWithBytes:bytes length:sizeof(bytes)/sizeof(Byte)];
+    NSLog(@"[sendData] %@", sendData);
     [client sendData:sendData];
     return YES;
 }

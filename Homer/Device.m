@@ -223,12 +223,15 @@
 }
 
 -(NSDictionary *)getDevInfo {
-    NSDictionary *dict = [[NSDictionary alloc] init];
-    return dict;
+    return [TcpUtil getDevInfo:self.deviceIp];
 }
 
 -(int) getBrightness {
     return [TcpUtil getBrightness:self.deviceIp];
+}
+
+-(int) getColorTemp {
+    return [TcpUtil getColorTemp:self.deviceIp];
 }
 
 // Auth

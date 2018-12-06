@@ -25,8 +25,9 @@ NSString *devVer;
 NSString *devType;
 int chipId;
 NSArray *hsbColor;
-Boolean devState;
-int brightness;
+Boolean devState; // 开关状态
+int brightness; // 亮度
+int colorTemp; // 色温
 
 @implementation TcpClient
 
@@ -124,6 +125,19 @@ int brightness;
 
 -(int) getBrightness {
     return brightness;
+}
+
+-(int) getColorTemp {
+    return colorTemp;
+}
+
+-(NSDictionary *) getDevInfo {
+    NSDictionary *dict = [[NSDictionary alloc] init];
+    NSNumber *colorTempNum = [NSNumber numberWithInt:colorTemp];
+    NSLog(@"hsb %@", hsbColor);
+    NSLog(@"white %d", colorTemp);
+    //dict = @{@"hsb":hsbColor, @"white":whiteNum};
+    return dict;
 }
 
 -(void) socket:(GCDAsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag
@@ -266,6 +280,7 @@ int brightness;
             NSNumber *sNum = [NSNumber numberWithInt:sVal];
             NSNumber *bNum = [NSNumber numberWithInt:bVal];
             NSArray *dataArray = [NSArray arrayWithObjects:hNum, sNum, bNum, nil];
+            
             hsbColor = [NSArray arrayWithArray:dataArray];
         }
         // devState
@@ -281,6 +296,16 @@ int brightness;
         if (valueType == 0x53) {
             Byte byte = dataInByte[9];
             brightness = (int)byte;
+        }
+        // 色温
+        if (valueType == 0x52) {
+            Byte bytes[] = {
+                0,
+                0,
+                dataInByte[9],
+                dataInByte[10]
+            };
+            colorTemp = [self bytesToIntLE:bytes];
         }
     }
 }

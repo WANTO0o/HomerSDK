@@ -87,4 +87,6 @@
 
 +(int) getBrightness:(NSString *)devHost;
 
++(int) getColorTemp:(NSString *)devHost;
+
 @end

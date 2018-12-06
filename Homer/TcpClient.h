@@ -47,4 +47,6 @@
 
 -(int) getBrightness;
 
+-(int) getColorTemp;
+
 @end

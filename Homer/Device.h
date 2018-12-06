@@ -240,6 +240,8 @@ typedef NS_ENUM(NSInteger, eSceneMode) {
 
 -(int) getBrightness;
 
+-(int) getColorTemp;
+
 // No publish 以下方法只供内部使用
 -(Boolean) writeAuthWithChipId:(int)chipId;
 
